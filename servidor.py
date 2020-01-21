@@ -54,6 +54,7 @@ class Inscricao(db.Model):
 
 class Curso(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    codigo = db.Column(db.String(10), unique=True, nullable=False)
     nome = db.Column(db.String(100), unique=True, nullable=False)
     data_cadastro = db.Column(db.DateTime(), nullable=False,
                               default=datetime.utcnow)
@@ -108,6 +109,34 @@ def api_cadastrar():
 
     return jsonify(msg='Usuário cadastrado com sucesso!')
 
+@app.route('/api/inscrever', methods=['POST'])
+@jwt_required
+def api_inscrever():
+    if not request.is_json:
+        return jsonify(error=True, msg='JSON não identificado na requisição'), 400
+
+    codigo_curso = request.json.get('codigo_curso', None)
+
+    if not codigo_curso:
+        return jsonify(error=True, msg='Código de curso não informado'), 400
+
+    curso = Curso.query.filter_by(codigo=codigo_curso).first()
+
+    if not curso:
+        return jsonify(error=True, msg='O curso informado não existe.'), 400
+
+    id_usuario_logado = get_jwt_claims()['usuario.id']
+    usuario = Usuario.query.filter_by(id=id_usuario_logado).first()
+
+    if not usuario:
+        return jsonify(error=True, msg='Erro ao identificar usuário logado.'), 400
+
+    nova_inscricao = Inscricao(usuario_id=usuario.id, curso_id=curso.id) 
+    db.session.add(nova_inscricao)
+    db.session.commit()
+
+    return jsonify(msg='Você foi inscrito com sucesso no curso %s (%s)' % (curso.nome, curso.codigo))
+
 @app.route('/api/token', methods=['POST'])
 def api_token():
     if not request.is_json:
@@ -135,8 +164,19 @@ def api_listar_cursos():
     cursos = []
 
     for curso in Curso.query.order_by(Curso.nome).all():
-        print("Curso %s" % curso)
-        cursos.append({'id': curso.id, 'nome': curso.nome})
+        cursos.append({'codigo': curso.codigo, 'nome': curso.nome})
+
+    return jsonify(cursos)
+
+@app.route('/api/cursos/meus', methods=['GET'])
+@jwt_required
+def api_listar_meus_cursos():
+    cursos = []
+    id_usuario_logado = get_jwt_claims()['usuario.id']
+
+    for inscricao in Inscricao.query.filter_by(usuario_id=id_usuario_logado):
+        curso = Curso.query.filter_by(id=inscricao.curso_id).first()
+        cursos.append({'codigo': curso.codigo, 'nome': curso.nome})
 
     return jsonify(cursos)
 
@@ -153,5 +193,6 @@ def page_index():
 db.create_all()
 
 if __name__ == '__main__':
+    print("Utilizando a JWT_SECRET_KEY: %s" % ENV_JWT_SECRET_KEY)
     app.run(debug=True)
 
