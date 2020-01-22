@@ -194,7 +194,7 @@ def page_index():
 def cli():
     print("Utilizando:")
     print("-> JWT_SECRET_KEY: %s" % ENV_JWT_SECRET_KEY)
-    print("-> DATABASE_FIL: %s" % ENV_DATABASE_FILE)
+    print("-> DATABASE_FILE: %s" % ENV_DATABASE_FILE)
 
     db.create_all()
     app.run(debug=True)
