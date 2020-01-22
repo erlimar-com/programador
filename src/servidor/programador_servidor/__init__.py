@@ -190,9 +190,12 @@ def page_index():
 # -----------------------------------------------------------
 # Inicialização 
 # -----------------------------------------------------------
-db.create_all()
 
-if __name__ == '__main__':
-    print("Utilizando a JWT_SECRET_KEY: %s" % ENV_JWT_SECRET_KEY)
+def cli():
+    print("Utilizando:")
+    print("-> JWT_SECRET_KEY: %s" % ENV_JWT_SECRET_KEY)
+    print("-> DATABASE_FIL: %s" % ENV_DATABASE_FILE)
+
+    db.create_all()
     app.run(debug=True)
 
