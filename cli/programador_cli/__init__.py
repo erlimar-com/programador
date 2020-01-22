@@ -27,11 +27,24 @@ def exibir_status():
     Exibe o status de sua conexão com o servidor
     '''
 
-    click.secho(f'HOME: {HOME}', fg='green')
-    click.secho(f'PROGRAMADOR_HOME: {PROGRAMADOR_HOME}')
-    click.secho(f'TOKEN: {obter_token()}')
+    token = obter_token()
 
-@cli.command()
+    if not token:
+        click.secho('Status: Desconectado')
+        return
+
+    url = f'{URL_API}/check'
+
+    headers = {'Authorization': f'Bearer {token}'}
+    resposta = requests.get(url, headers=headers)
+
+    if resposta.status_code != 200:
+        click.secho('Status: Token inválido ou expirado')
+        return
+
+    click.secho('Status: Conectado')
+
+@cli.command("login")
 def logar():
     '''
     Faz o login no servidor
@@ -62,10 +75,6 @@ def logar():
 
     if resposta.status_code != 201:
         exibe_mensagem_resposta(resposta, default='Erro desconhecido ao fazer login')
-
-    #click.secho(str(resposta.headers['content-type']))
-    #click.secho(str(resposta.status_code), fg='red')
-    #click.secho(str(resposta.text), fg='blue')
 
 # ----------------------------------------------------------------------------
 # Métodos autiliares

@@ -103,7 +103,7 @@ def api_cadastrar():
 
     senha_hash = sha256(senha.encode()).hexdigest()
     novo_usuario = Usuario(nome=nome, email=email, senha=senha_hash)
-    
+
     db.session.add(novo_usuario)
     db.session.commit()
 
@@ -157,6 +157,11 @@ def api_token():
     access_token = create_access_token(identity=usuario)
 
     return jsonify(access_token=access_token), 201
+
+@app.route('/api/check', methods=['GET'])
+@jwt_required
+def api_check():
+    return jsonify("OK")
 
 @app.route('/api/cursos', methods=['GET'])
 @jwt_required
