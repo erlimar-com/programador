@@ -48,17 +48,18 @@ def exibir_status():
     click.secho(f'Status: Conectado como {resposta.text}')
 
 @cli.command('login')
-def logar():
+@click.option('--email', help='Informe o e-mail para login')
+def logar(email):
     '''
     Faz o login no servidor
     '''
 
-    email = click.prompt('Informe seu e-mail')
+    email_login = email if email != None else click.prompt('Informe seu e-mail')
     senha = click.prompt('Informe a senha', hide_input=True)
 
     url = f'{URL_API}/token'
     headers = {'Content-Type': 'application/json'}
-    payload = {'email':email, 'senha':senha}
+    payload = {'email':email_login, 'senha':senha}
 
     resposta = requests.post(url, data=json.dumps(payload), headers=headers)
 
@@ -80,7 +81,37 @@ def logar():
         exibe_mensagem_resposta(resposta, default='Erro desconhecido ao fazer login')
 
 @cli.command()
-def inscrever():
+@click.option('--nome', help='Informe seu nome')
+@click.option('--email', help='Informe seu e-mail')
+def cadastrar(nome, email):
+    '''
+    Realiza o cadastro de um aluno
+    '''
+
+    nome_cadastro = nome if nome != None else click.prompt('Informe seu nome')
+    email_cadastro = email if email != None else click.prompt('Informe seu e-mail')
+    senha = click.prompt('Informe uma senha', hide_input=True)
+    senha_repetida = click.prompt('Informe a mesma senha novamente', hide_input=True)
+
+    if senha != senha_repetida:
+        click.echo('As senhas não conferem')
+        return
+
+    url = f'{URL_API}/cadastrar'
+    headers = {'Content-Type': 'application/json'}
+    payload = {'nome': nome_cadastro, 'email': email_cadastro, 'senha': senha }
+
+    resposta = requests.post(url, data=json.dumps(payload), headers=headers)
+
+    if resposta.status_code == 201:
+        exibe_mensagem_resposta(resposta, default=None)
+
+    if resposta.status_code != 201:
+        exibe_mensagem_resposta(resposta, default='Erro desconhecido ao cadastrar usuário')
+
+@cli.command()
+@click.option('--curso', help='Informe o código do curso')
+def inscrever(curso):
     '''
     Faz a inscrição em um curso
     '''
@@ -92,7 +123,7 @@ def inscrever():
         click.secho('Use: programador login')
         return
 
-    codigo_curso = click.prompt('Informe o código do curso')
+    codigo_curso = curso if curso != None else click.prompt('Informe o código do curso')
 
     url = f'{URL_API}/inscrever'
     headers = {'Content-Type': 'application/json', 'Authorization': f'Bearer {token}'}
