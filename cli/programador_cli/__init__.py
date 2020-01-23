@@ -21,7 +21,7 @@ def cli():
     if not os.path.exists(PROGRAMADOR_HOME):
         os.mkdir(PROGRAMADOR_HOME)
 
-@cli.command("status")
+@cli.command('status')
 def exibir_status():
     '''
     Exibe o status de sua conexão com o servidor
@@ -44,7 +44,7 @@ def exibir_status():
 
     click.secho('Status: Conectado')
 
-@cli.command("login")
+@cli.command('login')
 def logar():
     '''
     Faz o login no servidor
@@ -75,6 +75,76 @@ def logar():
 
     if resposta.status_code != 201:
         exibe_mensagem_resposta(resposta, default='Erro desconhecido ao fazer login')
+
+@cli.command('logout')
+def desconectar():
+    token_file_path = os.path.join(PROGRAMADOR_HOME, 'token.json')
+
+    if os.path.exists(token_file_path):
+        os.unlink(token_file_path)
+
+    click.secho('Agora você está desconectado do servidor')
+
+@cli.command('cursos')
+def listar_todos_cursos():
+    token = obter_token()
+
+    if not token != None:
+        click.secho('É necessário se conectar ao servidor primeiro')
+        click.secho('Use: programador login')
+        return
+
+    url = f'{URL_API}/cursos'
+    headers = {'Authorization': f'Bearer {token}'}
+
+    resposta = requests.get(url, headers=headers)
+
+    if resposta.status_code != 200:
+        exibe_mensagem_resposta(resposta, default='Erro ao obter cursos do servidor')
+        return
+
+    cursos = resposta.json()
+
+    if len(cursos) > 0:
+        click.secho('CODIGO                  NOME\n')
+    else:
+        click.secho('Não existe nenhum curso disponível!')
+
+    for c in cursos:
+        c_codigo = c['codigo'].ljust(20, ' ')
+        c_nome = c['nome']
+        click.secho(f'{c_codigo} -> {c_nome}')
+
+
+@cli.command('inscricoes')
+def listar_meus_cursos():
+    token = obter_token()
+
+    if not token != None:
+        click.secho('É necessário se conectar ao servidor primeiro')
+        click.secho('Use: programador login')
+        return
+
+    url = f'{URL_API}/cursos/meus'
+    headers = {'Authorization': f'Bearer {token}'}
+
+    resposta = requests.get(url, headers=headers)
+
+    if resposta.status_code != 200:
+        exibe_mensagem_resposta(resposta, default='Erro ao obter suas inscrições do servidor')
+        return
+
+    inscricoes = resposta.json()
+
+    if len(inscricoes) > 0:
+        click.secho('CODIGO                  NOME\n')
+    else:
+        click.secho('Você ainda não está inscrito em nenhum curso!')
+
+    for i in inscricoes:
+        i_codigo = i['codigo'].ljust(20, ' ')
+        i_nome = i['nome']
+        click.secho(f'{i_codigo} -> {i_nome}')
 
 # ----------------------------------------------------------------------------
 # Métodos autiliares
