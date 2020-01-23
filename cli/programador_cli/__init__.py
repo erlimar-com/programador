@@ -45,7 +45,7 @@ def exibir_status():
         click.secho('Status: Token inválido ou expirado')
         return
 
-    click.secho('Status: Conectado')
+    click.secho(f'Status: Conectado como {resposta.text}')
 
 @cli.command('login')
 def logar():

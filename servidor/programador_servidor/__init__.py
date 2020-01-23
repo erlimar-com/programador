@@ -64,7 +64,7 @@ class Curso(db.Model):
 # -----------------------------------------------------------
 @jwt.user_claims_loader
 def jwt_add_claims(usuario):
-    return { 'usuario.id': usuario.id }
+    return { 'usuario.id': usuario.id, 'usuario.email': usuario.email }
 
 @jwt.user_identity_loader
 def jwt_identity_lookup(usuario):
@@ -126,7 +126,7 @@ def api_inscrever():
     if not usuario:
         return jsonify(error=True, msg='Erro ao identificar usuário logado.'), 400
 
-    nova_inscricao = Inscricao(usuario_id=usuario.id, curso_id=curso.id) 
+    nova_inscricao = Inscricao(usuario_id=usuario.id, curso_id=curso.id)
     db.session.add(nova_inscricao)
     db.session.commit()
 
@@ -156,7 +156,8 @@ def api_token():
 @app.route('/api/check', methods=['GET'])
 @jwt_required
 def api_check():
-    return jsonify("OK")
+    email_usuario_logado = get_jwt_claims()['usuario.email']
+    return jsonify(email_usuario_logado)
 
 @app.route('/api/cursos', methods=['GET'])
 @jwt_required
