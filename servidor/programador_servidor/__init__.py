@@ -64,12 +64,7 @@ class Curso(db.Model):
 # -----------------------------------------------------------
 @jwt.user_claims_loader
 def jwt_add_claims(usuario):
-    return {
-        'usuario.id': usuario.id,
-        'usuario.email': usuario.email,
-        'usuario.nome': usuario.nome,
-        'usuario.data_cadastro': usuario.data_cadastro
-    }
+    return { 'usuario.id': usuario.id }
 
 @jwt.user_identity_loader
 def jwt_identity_lookup(usuario):

@@ -1,3 +1,6 @@
+# Copyright (c) 2020 Erlimar Silva Campos. Todos os direitos reservados.
+# Licenciado sobre a licença MIT. Mais informações da licença em LICENSE.
+
 import click
 import os
 import json
@@ -72,6 +75,33 @@ def logar():
             f.write(resposta.text)
 
         click.secho('Login efetuado com sucesso!', fg='green')
+
+    if resposta.status_code != 201:
+        exibe_mensagem_resposta(resposta, default='Erro desconhecido ao fazer login')
+
+@cli.command()
+def inscrever():
+    '''
+    Faz a inscrição em um curso
+    '''
+
+    token = obter_token()
+
+    if not token != None:
+        click.secho('É necessário se conectar ao servidor primeiro')
+        click.secho('Use: programador login')
+        return
+
+    codigo_curso = click.prompt('Informe o código do curso')
+
+    url = f'{URL_API}/inscrever'
+    headers = {'Content-Type': 'application/json', 'Authorization': f'Bearer {token}'}
+    payload = {'codigo_curso': codigo_curso }
+
+    resposta = requests.post(url, data=json.dumps(payload), headers=headers)
+
+    if resposta.status_code == 201:
+        exibe_mensagem_resposta(resposta, default='Inscrição realizada com sucesso')
 
     if resposta.status_code != 201:
         exibe_mensagem_resposta(resposta, default='Erro desconhecido ao fazer login')
