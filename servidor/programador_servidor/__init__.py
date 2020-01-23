@@ -191,7 +191,6 @@ def page_index():
 # -----------------------------------------------------------
 # Inicialização 
 # -----------------------------------------------------------
-
 def cli():
     print("Utilizando:")
     print("-> JWT_SECRET_KEY: %s" % ENV_JWT_SECRET_KEY)
@@ -199,4 +198,3 @@ def cli():
 
     db.create_all()
     app.run(debug=True)
-
