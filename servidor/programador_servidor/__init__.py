@@ -14,6 +14,7 @@ from datetime import datetime
 from hashlib import sha256
 from uuid import uuid1
 from os import getenv
+from validate_email import validate_email
 
 # -----------------------------------------------------------
 # Configurações da aplicação Flask
@@ -84,6 +85,9 @@ def api_cadastrar():
 
     if not nome or not email or not senha:
         return jsonify(error=True, msg='Dados inválidos'), 400
+
+    if not validate_email(email):
+        return jsonify(error=True, msg='O e-mail informado é inválido'), 400
 
     # A senha precisa ter pelo menos 6 caracteres
     senha = senha.strip()
@@ -192,9 +196,5 @@ def page_index():
 # Inicialização 
 # -----------------------------------------------------------
 def cli():
-    print("Utilizando:")
-    print("-> JWT_SECRET_KEY: %s" % ENV_JWT_SECRET_KEY)
-    print("-> DATABASE_FILE: %s" % ENV_DATABASE_FILE)
-
     db.create_all()
     app.run(debug=True)

@@ -9,9 +9,10 @@ setup(
     url='http://programador.erlimar.com',
     packages=find_packages(),
     install_requires=[
-        'Flask>=*',
-        'Flask-SQLAlchemy>=*',
-        'Flask-JWT-Extended>=*'
+        'Flask',
+        'Flask-SQLAlchemy',
+        'Flask-JWT-Extended',
+        'validate_email'
     ],
     entry_points={
         'console_scripts': [

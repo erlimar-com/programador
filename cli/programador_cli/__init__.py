@@ -20,23 +20,25 @@ def cli():
         os.mkdir(PROGRAMADOR_HOME)
 
 @cli.command('status', help='Exibe o status de sua conexão com o servidor')
-def exibir_status():
+def cmd_status():
     token = obter_token()
+
     if token != None:
         url = f'{URL_API}/check'
         headers = {'Authorization': f'Bearer {token}'}
         resposta = requests.get(url, headers=headers)
 
         if resposta.status_code != 200:
-            click.secho('Status: Token inválido ou expirado')
+            click.echo('Status: Token inválido ou expirado')
         else:
-            click.secho(f'Status: Conectado como {resposta.text}')
-    else:
-        click.secho('Status: Desconectado')
+            click.echo(f'Status: Conectado como {resposta.text}')
 
-@cli.command('login', help='Faz o login no servidor')
+    else:
+        click.echo('Status: Desconectado')
+
+@cli.command('entrar', help='Faz o login no servidor')
 @click.option('--email', help='Informe o e-mail para login')
-def logar(email):
+def cmd_entrar(email):
     email_login = email if email != None else click.prompt('Informe seu e-mail')
     senha = click.prompt('Informe a senha', hide_input=True)
     url = f'{URL_API}/token'
@@ -47,22 +49,24 @@ def logar(email):
     if resposta.status_code == 201:
         if resposta.headers['content-type'] == 'application/json':
             data_json = resposta.json()
+
         if data_json == None or not 'access_token' in data_json:
-            click.secho('Login efetuado, mas não foi possível entender o Token')
+            click.echo('Login efetuado, mas não foi possível entender o Token')
             return
 
         token_file_path = os.path.join(PROGRAMADOR_HOME, 'token.json')
+
         with open(token_file_path, 'w') as f:
             f.write(resposta.text)
 
-        click.secho('Login efetuado com sucesso!', fg='green')
+        click.echo('Login efetuado com sucesso!')
     else:
         exibe_mensagem_resposta(resposta, default='Erro desconhecido ao fazer login')
 
-@cli.command(help='Realiza o cadastro de um aluno')
+@cli.command('cadastrar', help='Realiza o cadastro de um usuário/aluno')
 @click.option('--nome', help='Informe seu nome')
 @click.option('--email', help='Informe seu e-mail')
-def cadastrar(nome, email):
+def cmd_cadastrar(nome, email):
     nome_cadastro = nome if nome != None else click.prompt('Informe seu nome')
     email_cadastro = email if email != None else click.prompt('Informe seu e-mail')
     senha = click.prompt('Informe uma senha', hide_input=True)
@@ -82,14 +86,13 @@ def cadastrar(nome, email):
     else:
         exibe_mensagem_resposta(resposta, default='Erro desconhecido ao cadastrar usuário')
 
-@cli.command(help='Faz a inscrição em um curso')
+@cli.command('inscrever', help='Faz a inscrição em um curso')
 @click.option('--curso', help='Informe o código do curso')
-def inscrever(curso):
+def cmd_inscrever(curso):
     token = obter_token()
 
     if not token != None:
-        click.secho('É necessário se conectar ao servidor primeiro')
-        click.secho('Use: programador login')
+        click.echo('É necessário se conectar ao servidor primeiro')
     else:
         codigo_curso = curso if curso != None else click.prompt('Informe o código do curso')
         url = f'{URL_API}/inscrever'
@@ -103,17 +106,17 @@ def inscrever(curso):
         if resposta.status_code != 201:
             exibe_mensagem_resposta(resposta, default='Erro desconhecido ao fazer login')
 
-@cli.command('logout')
-def desconectar():
+@cli.command('sair', help='Desconecta do servidor')
+def cmd_sair():
     token_file_path = os.path.join(PROGRAMADOR_HOME, 'token.json')
 
     if os.path.exists(token_file_path):
         os.unlink(token_file_path)
 
-    click.secho('Agora você está desconectado do servidor')
+    click.echo('Agora você está desconectado do servidor')
 
-@cli.command('cursos')
-def listar_todos_cursos():
+@cli.command('cursos', help='Lista os cursos disponíveis no servidor')
+def cmd_cursos():
     token = obter_token()
 
     if token != None:
@@ -125,9 +128,9 @@ def listar_todos_cursos():
             cursos = resposta.json()
 
             if len(cursos) > 0:
-                click.secho('CODIGO                  NOME\n')
+                click.echo('CODIGO                  NOME')
             else:
-                click.secho('Não existe nenhum curso disponível!')
+                click.echo('Não existe nenhum curso disponível!')
 
             for c in cursos:
                 c_codigo = c['codigo'].ljust(20, ' ')
@@ -139,8 +142,8 @@ def listar_todos_cursos():
         click.secho('É necessário se conectar ao servidor primeiro')
         click.secho('Use: programador login')
 
-@cli.command('inscricoes')
-def listar_meus_cursos():
+@cli.command('inscricoes', help='Lista os cursos que você está inscrito')
+def cmd_inscricoes():
     token = obter_token()
 
     if token != None:    
@@ -152,35 +155,32 @@ def listar_meus_cursos():
             inscricoes = resposta.json()
 
             if len(inscricoes) > 0:
-                click.secho('CODIGO                  NOME\n')
+                click.echo('CODIGO                  NOME')
             else:
-                click.secho('Você ainda não está inscrito em nenhum curso!')
+                click.echo('Você ainda não está inscrito em nenhum curso!')
 
             for i in inscricoes:
                 i_codigo = i['codigo'].ljust(20, ' ')
                 i_nome = i['nome']
-                click.secho(f'{i_codigo} -> {i_nome}')
+                click.echo(f'{i_codigo} -> {i_nome}')
         else:
             exibe_mensagem_resposta(resposta, default='Erro ao obter suas inscrições do servidor')
     else:
-        click.secho('É necessário se conectar ao servidor primeiro')
-        click.secho('Use: programador login')
+        click.echo('É necessário se conectar ao servidor primeiro')
 
 def exibe_mensagem_resposta(resposta, default):
-    def imprime(msg):
-        cor = 'green' if resposta != None and resposta.status_code in range(200, 300) else 'red'
-        click.secho(msg, fg=cor)
-
     if resposta == None or resposta.status_code == None:
-        imprime(default)
+        click.echo(default)
         return
 
     if resposta.headers['content-type'] == 'application/json':
         data_json = resposta.json()
+
         if 'msg' in data_json:
-            imprime(data_json['msg'])
+            click.echo(data_json['msg'])
             return
-        imprime(str(resposta.text))
+
+        click.echo(str(resposta.text))
 
 def obter_token():
     token_file_path = os.path.join(PROGRAMADOR_HOME, 'token.json')
