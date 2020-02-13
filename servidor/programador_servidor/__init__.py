@@ -21,6 +21,8 @@ from validate_email import validate_email
 # -----------------------------------------------------------
 app = Flask(__name__)
 
+ENV_HOST = getenv('APP_HOST', '127.0.0.1')
+ENV_PORT = getenv('APP_PORT', '5000')
 ENV_DATABASE_FILE = getenv('DATABASE_FILE', 'db.sqlite3')
 ENV_JWT_SECRET_KEY = getenv('JWT_SECRET_KEY', str(uuid1()))
 
@@ -197,4 +199,4 @@ def page_index():
 # -----------------------------------------------------------
 def cli():
     db.create_all()
-    app.run(debug=True)
+    app.run(debug=True, host=ENV_HOST, port=ENV_PORT)
