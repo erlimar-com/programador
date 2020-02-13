@@ -11,12 +11,14 @@ para servidor/programador_servidor/static/download/*
 
 Set-StrictMode -Version 2
 
-$originFile = Join-Path $PSScriptRoot "../cli/dist/ProgramadorCLI-0.1.tar.gz"
+$originFile1 = Join-Path $PSScriptRoot "../cli/dist/ProgramadorCLI-0.1.tar.gz"
+$originFile2 = Join-Path $PSScriptRoot "../servidor/dist/ProgramadorServidor-0.1.tar.gz"
 $destFolder = Join-Path $PSScriptRoot "../servidor/programador_servidor/static/download/"
 
 if (!(test-path $destFolder)) {
     New-Item -ItemType Directory  -Path $destFolder
 }
 
-Copy-Item $originFile $destFolder
+Copy-Item $originFile1 $destFolder
+Copy-Item $originFile2 $destFolder
 
