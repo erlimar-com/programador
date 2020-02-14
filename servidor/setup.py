@@ -20,6 +20,9 @@ setup(
         ]
     },
     package_data={
-        '': ['templates/*']
+        '': [
+            'templates/*',
+            'static/**/*' 
+        ]
     }
 )
