@@ -9,7 +9,7 @@ import pathlib
 
 HOME = str(pathlib.Path.home())
 PROGRAMADOR_HOME = os.path.join(HOME, '.programador')
-URL_API = 'http://localhost:5000/api'
+URL_API = os.getenv('PROGRAMADOR_API_URL', 'http://programador.erlimar.com/api')
 
 @click.group(help='Cliente para inscrição no projeto @ErlimarProgramador')
 def cli():
